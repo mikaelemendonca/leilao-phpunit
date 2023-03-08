@@ -21,6 +21,31 @@ class LeilaoTest extends TestCase
         static::assertEquals(1000, $leilao->getLances()[0]->getValor());
     }
 
+    public function testLeilaoNaoDeveAceitarMaisDe5LancesPorUsuario()
+    {
+        $joao = new Usuario('João');
+        $maria = new Usuario('Maria');
+        
+        $leilao = new Leilao('Brasília Amarela');
+        $leilao->recebeLance(new Lance($joao, 1000));
+        $leilao->recebeLance(new Lance($maria, 1500));
+        $leilao->recebeLance(new Lance($joao, 2000));
+        $leilao->recebeLance(new Lance($maria, 2500));
+        $leilao->recebeLance(new Lance($joao, 300));
+        $leilao->recebeLance(new Lance($maria, 3500));
+        $leilao->recebeLance(new Lance($joao, 4000));
+        $leilao->recebeLance(new Lance($maria, 4500));
+        $leilao->recebeLance(new Lance($joao, 5000));
+        $leilao->recebeLance(new Lance($maria, 5500));
+
+        $leilao->recebeLance(new Lance($joao, 6000));
+
+        static::assertCount(10, $leilao->getLances());
+        
+        $ultimoLance = end($leilao->getLances());
+        static::assertEquals(5500, $ultimoLance->getValor());
+    }
+
     /**
      * @dataProvider GeraLances
      */

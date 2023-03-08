@@ -21,6 +21,20 @@ class Leilao
         return $lance->getUsuario() == $ultimoLance->getUsuario();
     }
 
+    private function quantidadeLancesPorUsuario(Usuario $usuario): int
+    {
+        return array_reduce(
+            $this->lances,
+            function (int $totalAcumulado, Lance $lanceAtual) use ($usuario) {
+                if ($lanceAtual->getUsuario() == $usuario) {
+                    return $totalAcumulado + 1;
+                }
+                return $totalAcumulado;
+            },
+            0
+        );
+    }
+
     public function recebeLance(Lance $lance)
     {
         if (
@@ -29,6 +43,12 @@ class Leilao
         ) {
             return;
         }
+
+        $totalLances = $this->quantidadeLancesPorUsuario($lance->getUsuario());
+        if ($totalLances >= 5) {
+            return;
+        }
+
         $this->lances[] = $lance;
     }
 
