@@ -8,11 +8,24 @@ class Leilao
     private $lances;
     /** @var string */
     private $descricao;
+    /** @var bool */
+    private $finalizado;
 
     public function __construct(string $descricao)
     {
         $this->descricao = $descricao;
         $this->lances = [];
+        $this->finalizado = false;
+    }
+
+    public function finaliza()
+    {
+        $this->finalizado = true;
+    }
+
+    public function getFinalizado()
+    {
+        return $this->finalizado;
     }
 
     private function ehDoUltimoUsuario(Lance $lance): bool
@@ -41,12 +54,12 @@ class Leilao
             !empty($this->lances)
             && $this->ehDoUltimoUsuario($lance)                                                                                        
         ) {
-            return;
+            throw new \DomainException('Usuário não pode propor 2 lances consecutivos');
         }
 
         $totalLances = $this->quantidadeLancesPorUsuario($lance->getUsuario());
         if ($totalLances >= 5) {
-            return;
+            throw new \DomainException('Usuário não pode propor mais de 5 lances por leilão');
         }
 
         $this->lances[] = $lance;
