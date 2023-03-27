@@ -3,11 +3,11 @@
 namespace Alura\Leilao\Tests\Service;
 
 use PHPUnit\Framework\TestCase;
-use Alura\Leilao\Model\Encerrador;
+use Alura\Leilao\Service\Encerrador;
 use Alura\Leilao\Model\Leilao;
 use Alura\Leilao\Dao\Leilao as LeilaoDao;
 
-class LeilaoTest extends TestCase
+class EncerradorTest extends TestCase
 {
     public function testLeilaoComMaisDeUmaSemanaDevemSerEncerrados()
     {
@@ -26,5 +26,16 @@ class LeilaoTest extends TestCase
 
         $encerrador = new Encerrador();
         $encerrador->encerra();
+
+        $leiloes = $leilaoDao->recuperarFinalizados();
+        self::assertCount(2, $leiloes);
+        self::assertEquals(
+            'Fiat 147 0Km',
+            $leiloes[0]->recuperarDescricao()
+        );
+        self::assertEquals(
+            'Variant 0Km',
+            $leiloes[1]->recuperarDescricao()
+        );
     }
 }
