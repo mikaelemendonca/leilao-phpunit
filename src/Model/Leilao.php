@@ -10,6 +10,10 @@ class Leilao
     private $descricao;
     /** @var bool */
     private $finalizado;
+    /** @var \DateTimeInterface  */
+    private $dataInicio;
+    /** @var int */
+    private $id;
 
     public function __construct(string $descricao)
     {
@@ -71,5 +75,13 @@ class Leilao
     public function getLances(): array
     {
         return $this->lances;
+    }
+
+    public function temMaisDeUmaSemana(): bool
+    {
+        $hoje = new \DateTime();
+        $intervalo = $this->dataInicio->diff($hoje);
+
+        return $intervalo->days > 7;
     }
 }
