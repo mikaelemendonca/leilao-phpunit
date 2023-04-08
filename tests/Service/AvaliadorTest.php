@@ -13,7 +13,7 @@ class AvaliadorTest extends TestCase
     private $leiloeiro;
 
     // Preparação do ambiente
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->leiloeiro =  new Avaliador();
     }

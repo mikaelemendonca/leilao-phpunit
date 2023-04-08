@@ -4,23 +4,32 @@ namespace Alura\Leilao\Tests\Service;
 
 use PHPUnit\Framework\TestCase;
 use Alura\Leilao\Service\Encerrador;
+use Alura\Leilao\Service\EnviadorEmail;
 use Alura\Leilao\Model\Leilao;
 use Alura\Leilao\Dao\Leilao as LeilaoDao;
 
 class EncerradorTest extends TestCase
 {
-    public function testLeilaoComMaisDeUmaSemanaDevemSerEncerrados()
+    private $encerrador;
+    private $leilaoFiat147;
+    private $leilaoVariant;
+    private $enviadorEmail;
+
+    protected function setUp(): void
     {
-        $fiat147 = new Leilao(
+        $this->leilaoFiat147 = new Leilao(
             'Fiat 147 0Km',
             new \DateTimeImmutable('8 days ago')
         );
-        $variant = new Leilao(
+        $this->leilaoVariant = new Leilao(
             'Variant 0Km',
             new \DateTimeImmutable('10 days ago')
         );
 
-        $leiloes = [$fiat147, $variant];
+        $leiloes = [
+            $this->leilaoFiat147,
+            $this->leilaoVariant
+        ];
         $leilaoDao = $this->createMock(LeilaoDao::class);
         
         // personalizando o mock
@@ -43,13 +52,28 @@ class EncerradorTest extends TestCase
             ->method('atualiza')
             ->will(
                 $this->returnValueMap(
-                    [$fiat147],
-                    [$variant]
+                    [$this->leilaoFiat147],
+                    [$this->leilaoVariant]
                 )
             );
 
-        $encerrador = new Encerrador($leilaoDao);
-        $encerrador->encerra();
+        $this->enviadorEmail = $this->createMock(
+            EnviadorEmail::class
+        );
+        $this->encerrador = new Encerrador(
+            $leilaoDao,
+            $this->enviadorEmail
+        );
+    }
+
+    public function testLeilaoComMaisDeUmaSemanaDevemSerEncerrados()
+    {
+        $this->encerrador->encerra();
+
+        $leiloes = [
+            $this->leilaoFiat147,
+            $this->leilaoVariant
+        ];
 
         self::assertCount(2, $leiloes);
         self::assertEquals(
@@ -60,5 +84,33 @@ class EncerradorTest extends TestCase
             'Variant 0Km',
             $leiloes[1]->recuperarDescricao()
         );
+    }
+
+    public function testDeveContinuarOProcessamentoAoEncontrarErroAoEnviarEmail()
+    {
+        $e = new \DomainException('Erro ao enviar e-mail');
+
+        $this->enviadorEmail
+            ->expects($this->exactly(2))
+            ->method('notificarTerminoLeilao')
+            ->willThrowException($e);
+
+        $this->encerrador->encerra();
+    }
+
+    public function testSoDeveEnviarLeilaoPorEmailAposFinalizado()
+    {
+        // fazendo testes nos argumentos com o willReturnCallback
+        // espero que o notificarTerminoLeilao
+        // seja executado 2 vezes 
+        // com os leiloes finalizados
+        $this->enviadorEmail
+            ->expects($this->exactly(2))
+            ->method('notificarTerminoLeilao')
+            ->willReturnCallback(function (Leilao $leilao) {
+                static::assertTrue($leilao->estaFinalizado());
+            });
+
+        $this->encerrador->encerra();
     }
 }

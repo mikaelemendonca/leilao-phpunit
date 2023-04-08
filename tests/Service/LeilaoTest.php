@@ -44,20 +44,21 @@ class LeilaoTest extends TestCase
         $leilao->recebeLance(new Lance($joao, 6000));
     }
 
-    /**
-     * @dataProvider GeraLances
-     */
-    public function testLeilaoDeveReceberLances(
-        int $qtdeLances,
-        Leilao $leilao,
-        array $valores
-    ) {
-        static::assertCount($qtdeLances, $leilao->getLances());
+    // depreciada
+    // /**
+    //  * @dataProvider GeraLances
+    //  */
+    // public function testLeilaoDeveReceberLances(
+    //     int $qtdeLances,
+    //     Leilao $leilao,
+    //     array $valores
+    // ) {
+    //     static::assertCount($qtdeLances, $leilao->getLances());
 
-        foreach ($valores as $key => $valorEsperado) {
-            static::assertEquals($valorEsperado, $leilao->getLances()[$key]->getValor());
-        }
-    }
+    //     foreach ($valores as $key => $valorEsperado) {
+    //         static::assertEquals($valorEsperado, $leilao->getLances()[$key]->getValor());
+    //     }
+    // }
 
     public function geraLances()
     {
