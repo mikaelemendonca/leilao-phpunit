@@ -9,19 +9,31 @@ use PHPUnit\Framework\TestCase;
 
 class LeilaoDaoTest extends TestCase
 {
-    private $pdo;
+    private static $pdo;
 
+    public static function setUbBeforeClass(): void
+    {
+        self::$pdo = new \PDO('sqlite::memory:');
+        self::$pdo->exec(
+            "CREATE TABLE leiloes (
+                id INTERGER PRIMARY KEY,
+                descricao TEXT,
+                finalizado BOOL,
+                dataInicio TEXT
+            );"
+        );
+    }
+    
     protected function setUp(): void
     {
-        $this->pdo = ConnectionCreator::getConnection();
-        $this->pdo->beginTransaction();
+        self::$pdo->beginTransaction();
     }
 
     public function testInsercaoEBuscaDevemFuncionar()
     {
         // arrage
         $leilao = new Leilao('Variante 0Km');
-        $leilaoDao = new LeilaoDao($this->pdo);
+        $leilaoDao = new LeilaoDao(self::$pdo);
 
         // act
         $leilaoDao->salva($leilao);
@@ -38,6 +50,6 @@ class LeilaoDaoTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->pdo->rollback();
+        self::$pdo->rollback();
     }
 }
