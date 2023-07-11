@@ -102,7 +102,7 @@ class EncerradorTest extends TestCase
     {
         // fazendo testes nos argumentos com o willReturnCallback
         // espero que o notificarTerminoLeilao
-        // seja executado 2 vezes 
+        // seja executado 2 vezes
         // com os leiloes finalizados
         $this->enviadorEmail
             ->expects($this->exactly(2))
