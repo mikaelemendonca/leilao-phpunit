@@ -93,4 +93,25 @@ class LeilaoDaoTest extends TestCase
             ]
         ];
     }
+
+    public function testAoAtualizarLeilaoStatusDeveSerAtualizado()
+    {
+        // arrage
+        $leilao = new Leilao('Brasilia Amarela');
+        $leilaoDao = new LeilaoDao(self::$pdo);
+        $leilao = $leilaoDao->salva($leilao);
+        $leilao->finaliza();
+
+        // act
+        $leilaoDao->atualiza($leilao);
+
+        // assert
+        $leiloes = $leilaoDao->recuperarFinalizados();
+        self::assertCount(1, $leiloes);
+        self::assertSame(
+            'Brasilia Amarela',
+            $leiloes[0]->recuperarDescricao()
+        );
+        self::assertTrue($leiloes[0]->estaFinalizado());
+    }
 }
